@@ -24,7 +24,7 @@ game_over=False
 
 # Pipe settings
 pipe_width = 70
-pipe_gap = 88
+pipe_gap = 90
 pipe_speed = 5
 pipes = []
 
@@ -64,6 +64,11 @@ def move():
         
         top_coords = canvas.coords(top_pipe)
         bottom_coords = canvas.coords(bottom_pipe)
+
+
+        
+        
+        
         #detect collisions
         bird_coords=canvas.coords(bird)
         if((top_coords[0]<bird_coords[2] and top_coords[2]>bird_coords[0]) and (top_coords[3]>bird_coords[1] or bottom_coords[1]<bird_coords[3])):
@@ -75,12 +80,7 @@ def move():
     if game_over==True:
         canvas.create_text(WIDTH // 2, HEIGHT // 2, text="Game Over", font=('Arial', 24), fill="red")
     else:
-        root.after(40,move)
-
-
-
-
-
+        root.after(25,move)
 
 
 root.bind("<space>", jump)
