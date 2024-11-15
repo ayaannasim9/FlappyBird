@@ -20,12 +20,12 @@ bird_x = 50
 bird_y = HEIGHT // 2
 bird_speed_y = 0
 gravity = 1
-jump_strength = -13
+jump_strength = -10
 game_over=False
 
 # Pipe settings
 pipe_width = 70
-pipe_gap = 150
+pipe_gap = 88
 pipe_speed = 5
 pipes = []
 
@@ -65,7 +65,7 @@ def move():
         
         top_coords = canvas.coords(top_pipe)
         bottom_coords = canvas.coords(bottom_pipe)
-        
+
     if game_over==True:
         canvas.create_text(WIDTH // 2, HEIGHT // 2, text="Game Over", font=('Arial', 24), fill="red")
     else:
