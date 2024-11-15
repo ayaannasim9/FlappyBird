@@ -24,6 +24,7 @@ game_over=False
 
 #score count
 score=0
+score_text = canvas.create_text(WIDTH - 50, 30, text=f"Score: {score}", font=('Arial', 16), fill="white")
 
 # Pipe settings
 pipe_width = 70
@@ -54,7 +55,7 @@ def spawn_pipe():
         root.after(2000, spawn_pipe)
 
 def move():
-    global bird_y, bird_speed_y, score, game_over
+    global bird_y, bird_speed_y, score, game_over, score_text
 
     # Apply gravity to the bird
     bird_speed_y += gravity
@@ -68,11 +69,13 @@ def move():
         
         top_coords = canvas.coords(top_pipe)
         bottom_coords = canvas.coords(bottom_pipe)
+        if top_coords[2] < 0:
+            pipes.remove((top_pipe, bottom_pipe))
+            canvas.delete(top_pipe)
+            canvas.delete(bottom_pipe)
+            score += 1  # Increase score for each pipe passed
+            canvas.itemconfig(score_text, text=f"Score: {score}")
 
-
-        
-        
-        
         #detect collisions
         bird_coords=canvas.coords(bird)
         if((top_coords[0]<bird_coords[2] and top_coords[2]>bird_coords[0]) and (top_coords[3]>bird_coords[1] or bottom_coords[1]<bird_coords[3])):
