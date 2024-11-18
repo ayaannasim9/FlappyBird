@@ -83,9 +83,9 @@ def move():
             canvas.itemconfig(score_text, text=f"Score: {score}")
 
         # detect collisions
-        bird_coords=canvas.coords(bird)
-        if((top_coords[0]<bird_coords[2] and top_coords[2]>bird_coords[0]) and (top_coords[3]>bird_coords[1] or bottom_coords[1]<bird_coords[3])):
-            game_over=True
+        # bird_coords=canvas.coords(bird)
+        # if((top_coords[0]<bird_coords[2] and top_coords[2]>bird_coords[0]) and (top_coords[3]>bird_coords[1] or bottom_coords[1]<bird_coords[3])):
+        #     game_over=True
 
     if game_over==True:
         canvas.create_text(WIDTH // 2, HEIGHT // 2, text="Game Over", font=('Arial', 24), fill="red")
