@@ -90,11 +90,15 @@ def spawn_pipe():
     root.after(delay, spawn_pipe)
 
 def move():
-    global bird_y, bird_speed_y, score, game_over, score_text, is_paused, bypass_collision, pipe_speed, slow_motion_toggle
+    global bird_y, bird_speed_y, score, game_over, score_text, is_paused, bypass_collision, pipe_speed, slow_motion_toggle, gravity, jump_strength
     if slow_motion_toggle==False:
         pipe_speed=5
+        gravity=1
+        jump_strength=-9.8
     else:
         pipe_speed=1
+        gravity=0.2 
+        jump_strength=-2.2 
 
     if is_paused==False:
         # Apply gravity to the bird
