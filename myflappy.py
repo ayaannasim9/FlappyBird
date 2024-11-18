@@ -37,6 +37,9 @@ is_paused=False
 
 #cheat code
 bypass_collision=False
+pipe_gap_mode=False
+
+
 # Create bird
 bird = canvas.create_rectangle(bird_x, bird_y, bird_x + bird_size, bird_y + bird_size, fill="yellow")
 
@@ -54,9 +57,16 @@ def no_collision(event):
     bypass_collision=not bypass_collision
     # root.after(25,move)
 
+def pipe_on(event):
+    global pipe_gap_mode
+    pipe_gap_mode=not pipe_gap_mode
+
 def spawn_pipe():
-    global is_paused
-    pipe_gap=random.randint(86,92)
+    global is_paused, pipe_gap_mode
+    if pipe_gap_mode==False:
+        pipe_gap=random.randint(86,92)
+    else:
+        pipe_gap=200
     if is_paused==False:
         if not game_over:
             # Create top and bottom pipes with a gap
@@ -115,6 +125,7 @@ def move():
 root.bind("<space>", jump)
 root.bind("p",toggle_pause)
 root.bind("c",no_collision)
+root.bind("g", pipe_on)
 spawn_pipe()
 move()
 root.mainloop()
