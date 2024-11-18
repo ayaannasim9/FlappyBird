@@ -62,7 +62,7 @@ def move():
     bird_y += bird_speed_y
     canvas.coords(bird, bird_x, bird_y, bird_x + bird_size, bird_y + bird_size)
     
-    #checking if bird is at the bottom
+    #checking if bird is at the bottom or top
     bird_coords=canvas.coords(bird)
     if(bird_coords[1]<0 or bird_coords[3]>400):
         game_over=True
