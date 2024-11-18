@@ -28,7 +28,7 @@ score_text = canvas.create_text(WIDTH - 50, 30, text=f"Score: {score}", font=('A
 
 # Pipe settings
 pipe_width = 70
-pipe_gap = 88
+# pipe_gap = 88
 pipe_speed = 5
 pipes = []
 
@@ -41,6 +41,7 @@ def jump(event):
     # root.after(40,move)
 
 def spawn_pipe():
+    pipe_gap=random.randint(86,93)
     if not game_over:
         # Create top and bottom pipes with a gap
         pipe_x = WIDTH
