@@ -19,7 +19,7 @@ bird_x = 50
 bird_y = HEIGHT // 2
 bird_speed_y = 0
 gravity = 1
-jump_strength = -9.5
+jump_strength = -9.8
 game_over=False
 
 #score count
@@ -41,7 +41,7 @@ def jump(event):
     # root.after(40,move)
 
 def spawn_pipe():
-    pipe_gap=random.randint(86,93)
+    pipe_gap=random.randint(86,92)
     if not game_over:
         # Create top and bottom pipes with a gap
         pipe_x = WIDTH
@@ -86,9 +86,6 @@ def move():
         bird_coords=canvas.coords(bird)
         if((top_coords[0]<bird_coords[2] and top_coords[2]>bird_coords[0]) and (top_coords[3]>bird_coords[1] or bottom_coords[1]<bird_coords[3])):
             game_over=True
-
-    
-
 
     if game_over==True:
         canvas.create_text(WIDTH // 2, HEIGHT // 2, text="Game Over", font=('Arial', 24), fill="red")
