@@ -66,6 +66,10 @@ def pipe_on(event):
     global pipe_gap_mode
     pipe_gap_mode=not pipe_gap_mode
 
+def score_booster(event):
+    global score
+    score+=5
+
 def spawn_pipe():
     global is_paused, pipe_gap_mode
     delay=2000
@@ -143,6 +147,7 @@ root.bind("p",toggle_pause)
 root.bind("c",no_collision)
 root.bind("g", pipe_on)
 root.bind("s", slow_motion)
+root.bind("b", score_booster)
 spawn_pipe()
 move()
 root.mainloop()
