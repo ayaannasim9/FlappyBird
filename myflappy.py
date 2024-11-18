@@ -28,7 +28,7 @@ score_text = canvas.create_text(WIDTH - 50, 30, text=f"Score: {score}", font=('A
 
 # Pipe settings
 pipe_width = 70
-pipe_gap = 90
+pipe_gap = 88
 pipe_speed = 5
 pipes = []
 
