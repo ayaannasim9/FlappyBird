@@ -38,6 +38,7 @@ is_paused=False
 #cheat code
 bypass_collision=False
 pipe_gap_mode=False
+slow_motion_toggle=False
 
 
 # Create bird
@@ -52,6 +53,10 @@ def toggle_pause(event):
     global is_paused
     is_paused=not is_paused
 
+def slow_motion(event):
+    global pipe_speed, slow_motion_toggle
+    slow_motion_toggle=not slow_motion_toggle
+
 def no_collision(event):
     global bypass_collision
     bypass_collision=not bypass_collision
@@ -63,6 +68,7 @@ def pipe_on(event):
 
 def spawn_pipe():
     global is_paused, pipe_gap_mode
+    delay=2000
     if pipe_gap_mode==False:
         pipe_gap=random.randint(86,92)
     else:
@@ -79,10 +85,16 @@ def spawn_pipe():
             pipes.append((top_pipe, bottom_pipe))
             
     # Spawn pipes every 2000ms
-    root.after(2000, spawn_pipe)
+    if slow_motion_toggle==True:
+        delay=10000
+    root.after(delay, spawn_pipe)
 
 def move():
-    global bird_y, bird_speed_y, score, game_over, score_text, is_paused, bypass_collision
+    global bird_y, bird_speed_y, score, game_over, score_text, is_paused, bypass_collision, pipe_speed, slow_motion_toggle
+    if slow_motion_toggle==False:
+        pipe_speed=5
+    else:
+        pipe_speed=1
 
     if is_paused==False:
         # Apply gravity to the bird
@@ -126,6 +138,7 @@ root.bind("<space>", jump)
 root.bind("p",toggle_pause)
 root.bind("c",no_collision)
 root.bind("g", pipe_on)
+root.bind("s", slow_motion)
 spawn_pipe()
 move()
 root.mainloop()
