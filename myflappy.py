@@ -82,7 +82,7 @@ def move():
             score += 1  # Increase score for each pipe passed
             canvas.itemconfig(score_text, text=f"Score: {score}")
 
-        #detect collisions
+        # detect collisions
         bird_coords=canvas.coords(bird)
         if((top_coords[0]<bird_coords[2] and top_coords[2]>bird_coords[0]) and (top_coords[3]>bird_coords[1] or bottom_coords[1]<bird_coords[3])):
             game_over=True
@@ -91,7 +91,14 @@ def move():
         canvas.create_text(WIDTH // 2, HEIGHT // 2, text="Game Over", font=('Arial', 24), fill="red")
     else:
         # canvas.create_text(10,10, text=f'Score : {score}', font=('Arial', 18))
-        root.after(25,move)
+        if score<=5:
+            root.after(25,move)
+        elif score>5 and score<=10:
+            root.after(22,move)
+        elif score>10 and score<=15:
+            root.after(20, move)
+        else:
+            root.after(18,move)
 
 
 root.bind("<space>", jump)
