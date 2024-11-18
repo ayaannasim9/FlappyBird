@@ -61,7 +61,12 @@ def move():
     bird_speed_y += gravity
     bird_y += bird_speed_y
     canvas.coords(bird, bird_x, bird_y, bird_x + bird_size, bird_y + bird_size)
-
+    
+    #checking if bird is at the bottom
+    bird_coords=canvas.coords(bird)
+    if(bird_coords[1]<0 or bird_coords[3]>400):
+        game_over=True
+    
     #moving the pipe from the right end of the screen to the bird
     for top_pipe, bottom_pipe in pipes:
         canvas.move(top_pipe, -pipe_speed, 0)
