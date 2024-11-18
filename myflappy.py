@@ -69,6 +69,7 @@ def pipe_on(event):
 def score_booster(event):
     global score
     score+=5
+    canvas.itemconfig(score_text, text=f"Score: {score}")
 
 def spawn_pipe():
     global is_paused, pipe_gap_mode
