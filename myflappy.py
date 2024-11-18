@@ -35,6 +35,8 @@ pipes = []
 #game settings
 is_paused=False
 
+#cheat code
+bypass_collision=False
 # Create bird
 bird = canvas.create_rectangle(bird_x, bird_y, bird_x + bird_size, bird_y + bird_size, fill="yellow")
 
@@ -46,6 +48,11 @@ def jump(event):
 def toggle_pause(event):
     global is_paused
     is_paused=not is_paused
+
+def no_collision(event):
+    global bypass_collision
+    bypass_collision=not bypass_collision
+    # root.after(25,move)
 
 def spawn_pipe():
     global is_paused
@@ -65,7 +72,7 @@ def spawn_pipe():
     root.after(2000, spawn_pipe)
 
 def move():
-    global bird_y, bird_speed_y, score, game_over, score_text, is_paused
+    global bird_y, bird_speed_y, score, game_over, score_text, is_paused, bypass_collision
 
     if is_paused==False:
         # Apply gravity to the bird
@@ -93,9 +100,10 @@ def move():
                 canvas.itemconfig(score_text, text=f"Score: {score}")
 
             # detect collisions
-            bird_coords=canvas.coords(bird)
-            if((top_coords[0]<bird_coords[2] and top_coords[2]>bird_coords[0]) and (top_coords[3]>bird_coords[1] or bottom_coords[1]<bird_coords[3])):
-                game_over=True
+            if bypass_collision==False:
+                bird_coords=canvas.coords(bird)
+                if((top_coords[0]<bird_coords[2] and top_coords[2]>bird_coords[0]) and (top_coords[3]>bird_coords[1] or bottom_coords[1]<bird_coords[3])):
+                    game_over=True
 
         if game_over==True:
             canvas.create_text(WIDTH // 2, HEIGHT // 2, text="Game Over", font=('Arial', 24), fill="red")
@@ -106,6 +114,7 @@ def move():
 
 root.bind("<space>", jump)
 root.bind("p",toggle_pause)
+root.bind("c",no_collision)
 spawn_pipe()
 move()
 root.mainloop()
