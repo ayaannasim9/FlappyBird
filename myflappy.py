@@ -47,7 +47,7 @@ bird = canvas.create_rectangle(bird_x, bird_y, bird_x + bird_size, bird_y + bird
 def jump(event):
     global bird_speed_y
     bird_speed_y=jump_strength
-    # root.after(40,move)
+    
 
 def toggle_pause(event):
     global is_paused
@@ -60,7 +60,7 @@ def slow_motion(event):
 def no_collision(event):
     global bypass_collision
     bypass_collision=not bypass_collision
-    # root.after(25,move)
+    
 
 def pipe_on(event):
     global pipe_gap_mode
