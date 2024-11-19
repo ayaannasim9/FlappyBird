@@ -24,7 +24,7 @@ game_over=False
 
 #score count
 score=0
-score_text = canvas.create_text(WIDTH - 50, 30, text=f"Score: {score}", font=('Arial', 16), fill="white")
+score_text = canvas.create_text(WIDTH - 60, 30, text=f"Score: {score}", font=('Arial', 16), fill="white")
 
 # Pipe settings
 pipe_width = 70
@@ -146,7 +146,7 @@ def move():
             canvas.create_text(WIDTH // 2, HEIGHT // 2, text="Game Over", font=('Arial', 24), fill="red")
             return
             # canvas.create_text(10,10, text=f'Score : {score}', font=('Arial', 18))
-    root.after(25,move)
+    root.after(20,move)
 
 
 root.bind("<space>", jump)
