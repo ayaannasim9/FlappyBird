@@ -52,6 +52,10 @@ def jump(event):
 def toggle_pause(event):
     global is_paused
     is_paused=not is_paused
+    # if is_paused==True:
+    #     canvas.create_text(WIDTH // 2, HEIGHT // 2, text="Game Paused", font=('Arial', 20), fill="red")
+    # else:
+
 
 def slow_motion(event):
     global pipe_speed, slow_motion_toggle
@@ -67,9 +71,10 @@ def pipe_on(event):
     pipe_gap_mode=not pipe_gap_mode
 
 def score_booster(event):
-    global score
-    score+=5
-    canvas.itemconfig(score_text, text=f"Score: {score}")
+    global score, game_over
+    if game_over==False:
+        score+=5
+        canvas.itemconfig(score_text, text=f"Score: {score}")
 
 def spawn_pipe():
     global is_paused, pipe_gap_mode
