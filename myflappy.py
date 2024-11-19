@@ -52,9 +52,10 @@ def jump(event):
 def toggle_pause(event):
     global is_paused
     is_paused=not is_paused
-    # if is_paused==True:
-    #     canvas.create_text(WIDTH // 2, HEIGHT // 2, text="Game Paused", font=('Arial', 20), fill="red")
-    # else:
+    if is_paused==True:
+        canvas.create_text(WIDTH // 2, HEIGHT // 2, text="Game Paused", font=('Arial', 20), fill="white", tags="pause")
+    else:
+        canvas.delete("pause")
 
 
 def slow_motion(event):
