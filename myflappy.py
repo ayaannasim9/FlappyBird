@@ -235,7 +235,7 @@ def move():
         if game_over:
             canvas.create_text(WIDTH // 2, HEIGHT // 2, text="Game Over", font=('Arial', 30), fill="red", tags="game")
             return
-    root.after(20, move)
+    root.after(15, move)
 
 # Key bindings
 root.bind("<space>", jump)
