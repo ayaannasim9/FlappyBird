@@ -126,7 +126,7 @@ def difficulty():
 
 
 def spawn_pipe():
-    print("in spaw_pipe")
+    # print("in spaw_pipe")
     global is_paused, pipe_gap_mode
     delay = 2000
     if not pipe_gap_mode:
@@ -148,7 +148,7 @@ def spawn_pipe():
     root.after(delay, spawn_pipe)
 
 def move():
-    print("in move")
+    # print("in move")
     global bird_y, bird_speed_y, score, game_over, score_text, is_paused, bypass_collision, pipe_speed, slow_motion_toggle, gravity, jump_strength
     if score%5==0:
         # print("inside this thing in move")
