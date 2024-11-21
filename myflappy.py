@@ -7,52 +7,40 @@ root.title("Flappy Bird")
 # WIDTH, HEIGHT = root.winfo_screenwidth(), root.winfo_screenheight()
 WIDTH, HEIGHT = 1200,800
 root.geometry(f"{WIDTH}x{HEIGHT}")
-
-# Open and resize the background image
-original_bg = Image.open("background3.png")
-resized_bg = original_bg.resize((WIDTH, HEIGHT), Image.LANCZOS)
-background_image = ImageTk.PhotoImage(resized_bg)
-
 canvas = tk.Canvas(root, width=WIDTH, height=HEIGHT)
 canvas.pack(fill="both", expand=True)
 
+# Open and resize the background image
+original_bg = Image.open("background3.png").resize((WIDTH, HEIGHT), Image.LANCZOS)
+background_image = ImageTk.PhotoImage(original_bg)
 canvas.create_image(0, 0, image=background_image, anchor="nw")
 
 # Bird settings
 bird_size = 50 # Size for collision purposes
-bird_x = 50
+bird_x = 80
 bird_y = HEIGHT // 2
 bird_speed_y = 0
 gravity = 2
 jump_strength = -19.0
 game_over = False
 
-# Boss key
-boss_image = Image.open("spreadsheet.png").resize((WIDTH,HEIGHT), Image.LANCZOS)
-boss_image_final=ImageTk.PhotoImage(boss_image)
-boss_image_displayed = False
-
 # Load the bird image
-bird_image = Image.open("bird3.png")
-bird_image_resized=bird_image.resize((50,50), Image.LANCZOS)
-bird_image_tk=ImageTk.PhotoImage(bird_image_resized)
+bird_image = Image.open("bird3.png").resize((50,50), Image.LANCZOS)
+bird_image_tk=ImageTk.PhotoImage(bird_image)
+# bird = canvas.create_image(bird_x, bird_y, image=bird_image_tk, anchor="center", tags="game")
 bird_width = bird_image_tk.width()-19.3
 bird_height = bird_image_tk.height()-19.3
-
-
-# Load pipe image (pipe3.png)
-pipe_image = Image.open("pipe3.png")  # Open pipe3.png image
-pipe_image_resized = pipe_image.resize((70, HEIGHT), Image.LANCZOS)  # Resize to desired pipe size
-pipe_image_tk = ImageTk.PhotoImage(pipe_image_resized)  # Convert to Tkinter PhotoImage format
-
-# Score count
-score = 0
-score_text = canvas.create_text(WIDTH - 60, 30, text=f"Score: {score}", font=('Arial', 20), fill="white", tags="game")
 
 # Pipe settings
 pipe_width = 70
 pipe_speed = 18
 pipes = []
+# Load pipe image (pipe3.png)
+pipe_image = Image.open("pipe3.png").resize((70, HEIGHT), Image.LANCZOS) # Open pipe3.png image
+pipe_image_tk = ImageTk.PhotoImage(pipe_image)  # Convert to Tkinter PhotoImage format
+
+# Score count
+score = 0
 
 # Game settings
 is_paused = False
@@ -61,11 +49,62 @@ is_paused = False
 bypass_collision = False
 pipe_gap_mode = False
 slow_motion_toggle = False
+# Boss key
+boss_image = Image.open("spreadsheet.png").resize((WIDTH,HEIGHT), Image.LANCZOS)
+boss_image_final=ImageTk.PhotoImage(boss_image)
+boss_image_displayed = False
 
-# Create bird as an image
-bird = canvas.create_image(bird_x, bird_y, image=bird_image_tk, anchor="center", tags="game")
-# print("outside any func")
 
+def main_menu():
+    # Main menu title
+    clear_screen()
+    canvas.create_image(0, 0, image=background_image, anchor="nw")
+    canvas.create_text(WIDTH // 2, HEIGHT // 4, text="Flappy Bird", font=("Arial", 50), fill="white", tags="menu")
+
+    # Play Game button
+    play_button = tk.Button(root, text="Play Game", font=("Arial", 20), command=play_game)
+    canvas.create_window(WIDTH // 2, HEIGHT // 2 - 50, window=play_button)
+
+        # Leaderboard button
+        # leaderboard_button = tk.Button(root, text="Leaderboard", font=("Arial", 20), command=show_leaderboard)
+        # canvas.create_window(WIDTH // 2, HEIGHT // 2 + 20, window=leaderboard_button)
+
+    # Controls button
+    controls_button = tk.Button(root, text="Controls", font=("Arial", 20), command=show_controls)
+    canvas.create_window(WIDTH // 2, HEIGHT // 2 + 90, window=controls_button)
+
+def play_game():
+    clear_screen()
+    global background_image,bird,score_text
+    canvas.create_image(0, 0, image=background_image, anchor="nw")
+    score_text = canvas.create_text(WIDTH - 60, 30, text=f"Score: {score}", font=('Arial', 20), fill="white", tags="game")
+    bird = canvas.create_image(bird_x, bird_y, image=bird_image_tk, anchor="center", tags="game")
+    spawn_pipe()
+    move()
+
+def clear_screen():
+    """Clear all elements from the canvas."""
+    canvas.delete("all")
+    # canvas.itemconfigure("game", state="hidden")
+
+def show_controls():
+    """Display the controls screen."""
+    clear_screen()
+    canvas.create_text(WIDTH // 2, HEIGHT // 6, text="Controls", font=("Arial", 40), fill="white", tags="controls")
+    controls_info = [
+        "Space: Jump",
+        "P: Pause/Resume",
+        "C: Toggle Collision Bypass",
+        "G: Toggle Pipe Gap Mode",
+        "B: Score Booster",
+        "A: Boss Key"
+    ]
+    for i, line in enumerate(controls_info):
+        canvas.create_text(WIDTH // 2, HEIGHT // 3 + i * 30, text=line, font=("Arial", 20), fill="white", tags="controls")
+
+    # Back to main menu button
+    back_button = tk.Button(root, text="Back", font=("Arial", 20), command=main_menu)
+    canvas.create_window(WIDTH // 2, HEIGHT - 100, window=back_button)
 def boss_key(event):
     global boss_image_displayed, is_paused
     is_paused=not is_paused
@@ -124,11 +163,10 @@ def difficulty():
         pipe_speed=33
         # print(pipe_speed)
 
-
 def spawn_pipe():
     # print("in spaw_pipe")
     global is_paused, pipe_gap_mode
-    delay = 2000
+    delay = 1750
     if not pipe_gap_mode:
         pipe_gap = random.randint(30, 38)
     else:
@@ -149,7 +187,7 @@ def spawn_pipe():
 
 def move():
     # print("in move")
-    global bird_y, bird_speed_y, score, game_over, score_text, is_paused, bypass_collision, pipe_speed, slow_motion_toggle, gravity, jump_strength
+    global bird_y, bird_speed_y, score, game_over, is_paused, bypass_collision, pipe_speed, slow_motion_toggle, gravity, jump_strength
     if score%5==0:
         # print("inside this thing in move")
         difficulty()
@@ -197,7 +235,7 @@ def move():
         if game_over:
             canvas.create_text(WIDTH // 2, HEIGHT // 2, text="Game Over", font=('Arial', 30), fill="red", tags="game")
             return
-    root.after(20, move)
+    root.after(15, move)
 
 # Key bindings
 root.bind("<space>", jump)
@@ -206,9 +244,6 @@ root.bind("c", no_collision)
 root.bind("g", pipe_on)
 root.bind("b", score_booster)
 root.bind("a", boss_key)
-
+main_menu()
 # Start game functions
-spawn_pipe()
-move()
-
 root.mainloop()
