@@ -64,6 +64,7 @@ slow_motion_toggle = False
 
 # Create bird as an image
 bird = canvas.create_image(bird_x, bird_y, image=bird_image_tk, anchor="center", tags="game")
+# print("outside any func")
 
 def boss_key(event):
     global boss_image_displayed, is_paused
@@ -107,8 +108,25 @@ def score_booster(event):
     if not game_over:
         score += 5
         canvas.itemconfig(score_text, text=f"Score: {score}")
+def difficulty():
+    # print("adjusting difficulty")
+    global pipe_speed, score
+    if score<=5:
+        pipe_speed=pipe_speed
+        # print(pipe_speed)
+    elif score <=10:
+        pipe_speed=23.5
+        # print(pipe_speed)
+    elif score<=15:
+        pipe_speed=28
+        # print(pipe_speed)
+    else:
+        pipe_speed=33
+        # print(pipe_speed)
+
 
 def spawn_pipe():
+    print("in spaw_pipe")
     global is_paused, pipe_gap_mode
     delay = 2000
     if not pipe_gap_mode:
@@ -130,8 +148,12 @@ def spawn_pipe():
     root.after(delay, spawn_pipe)
 
 def move():
+    print("in move")
     global bird_y, bird_speed_y, score, game_over, score_text, is_paused, bypass_collision, pipe_speed, slow_motion_toggle, gravity, jump_strength
-
+    if score%5==0:
+        # print("inside this thing in move")
+        difficulty()
+    # print(pipe_speed)
     if not is_paused:
         # Apply gravity to the bird
         bird_speed_y += gravity
