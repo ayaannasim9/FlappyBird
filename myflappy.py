@@ -53,7 +53,8 @@ slow_motion_toggle = False
 boss_image = Image.open("spreadsheet.png").resize((WIDTH,HEIGHT), Image.LANCZOS)
 boss_image_final=ImageTk.PhotoImage(boss_image)
 boss_image_displayed = False
-
+#Leaderboard file
+LEADERBOARD_FILE="leaderboard.txt"
 
 def main_menu():
     # Main menu title
@@ -65,9 +66,9 @@ def main_menu():
     play_button = tk.Button(root, text="Play Game", font=("Arial", 20), command=play_game)
     canvas.create_window(WIDTH // 2, HEIGHT // 2 - 50, window=play_button)
 
-        # Leaderboard button
-        # leaderboard_button = tk.Button(root, text="Leaderboard", font=("Arial", 20), command=show_leaderboard)
-        # canvas.create_window(WIDTH // 2, HEIGHT // 2 + 20, window=leaderboard_button)
+    # Leaderboard button
+    leaderboard_button = tk.Button(root, text="Leaderboard", font=("Arial", 20), command=display_leaderboard)
+    canvas.create_window(WIDTH // 2, HEIGHT // 2 + 20, window=leaderboard_button)
 
     # Controls button
     controls_button = tk.Button(root, text="Controls", font=("Arial", 20), command=show_controls)
@@ -86,7 +87,25 @@ def clear_screen():
     """Clear all elements from the canvas."""
     canvas.delete("all")
     # canvas.itemconfigure("game", state="hidden")
+def display_leaderboard():
+    """Display the leaderboard on a new canvas."""
+    clear_screen()
 
+    canvas.create_text(WIDTH // 2, HEIGHT // 6, text="Leaderboard", font=("Arial", 40), fill="white", tags="leaderboard")
+
+    try:
+        with open(LEADERBOARD_FILE, 'r') as f:
+            lines = f.readlines()
+    except FileNotFoundError:
+        lines = []
+
+    # Display the top 10 scores
+    for i, line in enumerate(lines[:10]):  # Limit to top 10 scores
+        canvas.create_text(WIDTH // 2, HEIGHT // 4 + i * 30, text=line.strip(), font=("Arial", 20), fill="white", tags="leaderboard")
+
+    # Back to main menu button
+    back_button = tk.Button(root, text="Back", font=("Arial", 20), command=main_menu)
+    canvas.create_window(WIDTH // 2, HEIGHT - 100, window=back_button)
 def show_controls():
     """Display the controls screen."""
     clear_screen()
@@ -120,6 +139,26 @@ def boss_key(event):
         canvas.itemconfigure("game", state="normal")
     
     boss_image_displayed = not boss_image_displayed
+def sort_leaderboard():
+    global LEADERBOARD_FILE
+    """Sort the leaderboard and save it back to the file."""
+    with open(LEADERBOARD_FILE, 'r') as f:
+        lines = f.readlines()
+    # Parse and sort the scores
+    scores = []
+    for line in lines:
+        try:
+            name, score = line.strip().split(":")
+            scores.append((name, int(score)))
+        except ValueError:
+            continue  # Skip invalid lines
+    
+    scores.sort(key=lambda x: x[1], reverse=True)  # Sort by score (descending)
+
+    # Write sorted scores back to the file
+    with open(LEADERBOARD_FILE, 'w') as f:
+        for name, score in scores:
+            f.write(f"{name}: {score}\n")
 
 def jump(event):
     global bird_speed_y, jump_strength
@@ -234,6 +273,7 @@ def move():
 
         if game_over:
             canvas.create_text(WIDTH // 2, HEIGHT // 2, text="Game Over", font=('Arial', 30), fill="red", tags="game")
+            sort_leaderboard()
             return
     root.after(15, move)
 
