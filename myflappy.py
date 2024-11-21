@@ -1,6 +1,7 @@
 import tkinter as tk
 import random
 from PIL import Image, ImageTk
+import os
 
 root = tk.Tk()
 root.title("Flappy Bird")
@@ -55,9 +56,14 @@ boss_image_final=ImageTk.PhotoImage(boss_image)
 boss_image_displayed = False
 #Leaderboard file
 LEADERBOARD_FILE="leaderboard.txt"
+#some ids
+move_id=None
+spawn_id=None
 
 def main_menu():
+    global game_over
     # Main menu title
+    game_over=False
     clear_screen()
     canvas.create_image(0, 0, image=background_image, anchor="nw")
     canvas.create_text(WIDTH // 2, HEIGHT // 4, text="Flappy Bird", font=("Arial", 50), fill="white", tags="menu")
@@ -204,7 +210,7 @@ def difficulty():
 
 def spawn_pipe():
     # print("in spaw_pipe")
-    global is_paused, pipe_gap_mode
+    global is_paused, pipe_gap_mode, spawn_id
     delay = 1750
     if not pipe_gap_mode:
         pipe_gap = random.randint(30, 38)
@@ -222,11 +228,27 @@ def spawn_pipe():
                 pipes.append((top_pipe, bottom_pipe))
 
     # Spawn pipes every 4000ms (or adjust as needed)
-    root.after(delay, spawn_pipe)
-
+    if not game_over:
+        spawn_id = root.after(delay, spawn_pipe)
+    else:
+        if spawn_id is not None:
+            root.after_cancel(spawn_id)
+    # spawn_id=root.after(delay, spawn_pipe)
+    if game_over:
+        root.after_cancel(spawn_id)
+def save_score(player_name, player_score):
+    """Save the player's score to the leaderboard."""
+    if not os.path.exists(LEADERBOARD_FILE):
+        with open(LEADERBOARD_FILE, 'w') as f:
+            pass  # Create the file if it doesn't exist
+    
+    with open(LEADERBOARD_FILE, 'a') as f:
+        f.write(f"{player_name}: {player_score}\n")
+    
+    sort_leaderboard()
 def move():
     # print("in move")
-    global bird_y, bird_speed_y, score, game_over, is_paused, bypass_collision, pipe_speed, slow_motion_toggle, gravity, jump_strength
+    global bird_y, bird_speed_y, score, game_over, is_paused, bypass_collision, pipe_speed, slow_motion_toggle, gravity, jump_strength, move_id
     if score%5==0:
         # print("inside this thing in move")
         difficulty()
@@ -272,10 +294,54 @@ def move():
                     game_over = True
 
         if game_over:
-            canvas.create_text(WIDTH // 2, HEIGHT // 2, text="Game Over", font=('Arial', 30), fill="red", tags="game")
-            sort_leaderboard()
+            handle_game_over()
             return
-    root.after(15, move)
+    move_id=root.after(15, move)
+
+def handle_game_over():
+    """Handles game-over state and prompts for player name."""
+    global score, game_over, move_id, bird_y, bird_speed_y, spawn_id
+    if move_id is not None:
+        root.after_cancel(move_id)
+        move_id = None
+    
+    if spawn_id is not None:
+        root.after_cancel(spawn_id)
+        spawn_id = None
+    
+    
+    bird_y = HEIGHT // 2
+    bird_speed_y = 0
+    game_over = False
+    
+    # Display Game Over message and player's score
+    canvas.create_text(WIDTH // 2, HEIGHT // 2 - 50, text="Game Over", font=('Arial', 30), fill="red", tags="game")
+    canvas.create_text(WIDTH // 2, HEIGHT // 2, text=f"Your Score: {score}", font=('Arial', 20), fill="white", tags="game")
+
+    # Create an entry widget for player name
+    name_entry = tk.Entry(root, font=("Arial", 20))
+    canvas.create_window(WIDTH // 2, HEIGHT // 2 + 50, window=name_entry)
+
+    # Add a save button
+    save_button = tk.Button(root, text="Save", font=("Arial", 20),  command=lambda: save_and_exit(name_entry.get()))
+    canvas.create_window(WIDTH // 2, HEIGHT // 2 + 100, window=save_button)
+    # root.after_cancel(move_id)
+    
+
+def save_and_exit(player_name):
+
+    """Saves the player's score and returns to the main menu."""
+    global score, game_over, pipes
+    if not player_name.strip():
+        player_name = "Unknown"  # Default name if none provided
+
+    save_score(player_name, score)
+    score=0
+    for top_pipe, bottom_pipe in pipes:
+        canvas.delete(top_pipe)
+        canvas.delete(bottom_pipe)
+    pipes.clear()
+    main_menu()  # Return to main menu
 
 # Key bindings
 root.bind("<space>", jump)
@@ -283,7 +349,7 @@ root.bind("p", toggle_pause)
 root.bind("c", no_collision)
 root.bind("g", pipe_on)
 root.bind("b", score_booster)
-root.bind("a", boss_key)
+root.bind("<Escape>", boss_key)
 main_menu()
 # Start game functions
 root.mainloop()
