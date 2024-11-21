@@ -61,9 +61,7 @@ move_id=None
 spawn_id=None
 
 def main_menu():
-    global game_over
     # Main menu title
-    game_over=False
     clear_screen()
     canvas.create_image(0, 0, image=background_image, anchor="nw")
     canvas.create_text(WIDTH // 2, HEIGHT // 4, text="Flappy Bird", font=("Arial", 50), fill="white", tags="menu")
@@ -180,12 +178,14 @@ def toggle_pause(event):
             canvas.delete("pause")
 
 def no_collision(event):
-    global bypass_collision
-    bypass_collision = not bypass_collision
+    global bypass_collision, game_over
+    if not game_over:
+        bypass_collision = not bypass_collision
 
 def pipe_on(event):
-    global pipe_gap_mode
-    pipe_gap_mode = not pipe_gap_mode
+    global pipe_gap_mode, game_over
+    if not game_over:
+        pipe_gap_mode = not pipe_gap_mode
 
 def score_booster(event):
     global score, game_over
@@ -301,6 +301,7 @@ def move():
 def handle_game_over():
     """Handles game-over state and prompts for player name."""
     global score, game_over, move_id, bird_y, bird_speed_y, spawn_id
+    #ending the root.after calls, for next game to begin properly
     if move_id is not None:
         root.after_cancel(move_id)
         move_id = None
@@ -309,10 +310,9 @@ def handle_game_over():
         root.after_cancel(spawn_id)
         spawn_id = None
     
-    
+    #resetting game variables
     bird_y = HEIGHT // 2
     bird_speed_y = 0
-    game_over = False
     
     # Display Game Over message and player's score
     canvas.create_text(WIDTH // 2, HEIGHT // 2 - 50, text="Game Over", font=('Arial', 30), fill="red", tags="game")
@@ -325,9 +325,7 @@ def handle_game_over():
     # Add a save button
     save_button = tk.Button(root, text="Save", font=("Arial", 20),  command=lambda: save_and_exit(name_entry.get()))
     canvas.create_window(WIDTH // 2, HEIGHT // 2 + 100, window=save_button)
-    # root.after_cancel(move_id)
     
-
 def save_and_exit(player_name):
 
     """Saves the player's score and returns to the main menu."""
@@ -336,6 +334,9 @@ def save_and_exit(player_name):
         player_name = "Unknown"  # Default name if none provided
 
     save_score(player_name, score)
+
+    #resetting the game variables
+    game_over = False
     score=0
     for top_pipe, bottom_pipe in pipes:
         canvas.delete(top_pipe)
