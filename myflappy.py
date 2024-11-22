@@ -201,14 +201,16 @@ def show_controls():
     """Display the controls screen."""
     clear_screen()
     canvas.create_text(WIDTH // 2, HEIGHT // 6, text="Controls", font=("Arial", 40), fill="white", tags="controls")
+    # Display updated key bindings
     controls_info = [
-        "Space: Jump",
-        "P: Pause/Resume",
-        "C: Toggle Collision Bypass",
-        "G: Toggle Pipe Gap Mode",
-        "B: Score Booster",
-        "A: Boss Key"
+        f"Jump: {key_bindings['jump']}",
+        f"Pause/Resume: {key_bindings['pause']}",
+        f"Toggle Collision Bypass: {key_bindings['collision_toggle']}",
+        f"Toggle Pipe Gap Mode: {key_bindings['pipe_gap_toggle']}",
+        f"Score Booster: {key_bindings['score_booster']}",
+        f"Boss Key: {key_bindings['boss_key']}"
     ]
+
     for i, line in enumerate(controls_info):
         canvas.create_text(WIDTH // 2, HEIGHT // 3 + i * 30, text=line, font=("Arial", 20), fill="white", tags="controls")
 
@@ -431,17 +433,17 @@ def save_and_exit(player_name):
         canvas.delete(top_pipe)
         canvas.delete(bottom_pipe)
     pipes.clear()
-    bind_keys()
+    # bind_keys()
     main_menu()  # Return to main menu
 
-def bind_keys():
-    """Bind all game-related keys."""
-    root.bind("<space>", jump)
-    root.bind("p", toggle_pause)
-    root.bind("c", no_collision)
-    root.bind("g", pipe_on)
-    root.bind("b", score_booster)
-    root.bind("<Escape>", boss_key)
+# def bind_keys():
+#     """Bind all game-related keys."""
+#     root.bind("<space>", jump)
+#     root.bind("p", toggle_pause)
+#     root.bind("c", no_collision)
+#     root.bind("g", pipe_on)
+#     root.bind("b", score_booster)
+#     root.bind("<Escape>", boss_key)
 
 
 # Key bindings
