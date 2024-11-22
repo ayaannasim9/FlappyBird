@@ -11,6 +11,17 @@ root.geometry(f"{WIDTH}x{HEIGHT}")
 canvas = tk.Canvas(root, width=WIDTH, height=HEIGHT)
 canvas.pack(fill="both", expand=True)
 
+#keys
+key_bindings = {
+    "jump": "<space>",
+    "pause": "p",
+    "collision_toggle": "c",
+    "pipe_gap_toggle": "g",
+    "score_booster": "b",
+    "boss_key": "<Escape>",
+}
+
+
 # Open and resize the background image
 original_bg = Image.open("background3.png").resize((WIDTH, HEIGHT), Image.LANCZOS)
 background_image = ImageTk.PhotoImage(original_bg)
@@ -24,6 +35,7 @@ bird_speed_y = 0
 gravity = 2
 jump_strength = -19.0
 game_over = False
+in_game=False
 
 # Load the bird image
 bird_image = Image.open("bird3.png").resize((50,50), Image.LANCZOS)
@@ -78,14 +90,88 @@ def main_menu():
     controls_button = tk.Button(root, text="Controls", font=("Arial", 20), command=show_controls)
     canvas.create_window(WIDTH // 2, HEIGHT // 2 + 90, window=controls_button)
 
+    customize_button = tk.Button(root, text="Customize Controls", font=("Arial", 20), command=customize_controls)
+    canvas.create_window(WIDTH // 2, HEIGHT // 2 + 160, window=customize_button)
+
 def play_game():
+    global in_game
     clear_screen()
     global background_image,bird,score_text
     canvas.create_image(0, 0, image=background_image, anchor="nw")
     score_text = canvas.create_text(WIDTH - 60, 30, text=f"Score: {score}", font=('Arial', 20), fill="white", tags="game")
     bird = canvas.create_image(bird_x, bird_y, image=bird_image_tk, anchor="center", tags="game")
+    in_game=True
     spawn_pipe()
     move()
+def customize_controls():
+    """A screen where users can customize controls."""
+    clear_screen()
+
+    canvas.create_text(
+        WIDTH // 2, HEIGHT // 6,
+        text="Customize Controls",
+        font=("Arial", 30), fill="white", tags="controls"
+    )
+
+    canvas.create_text(
+        WIDTH // 2, HEIGHT // 4,
+        text="Click an action below, then press a key to rebind.",
+        font=("Arial", 20), fill="white", tags="controls"
+    )
+
+    # Display buttons for each action
+    for i, (action, current_key) in enumerate(key_bindings.items()):
+        button = tk.Button(
+            root,
+            text=f"{action.capitalize()} (Current: {current_key})",
+            font=("Arial", 16),
+            command=lambda act=action: wait_for_keypress(act)
+        )
+        canvas.create_window(WIDTH // 2, HEIGHT // 3 + i * 50, window=button)
+
+    # Add a "Back to Menu" button
+    back_button = tk.Button(root, text="Back", font=("Arial", 20), command=main_menu)
+    canvas.create_window(WIDTH // 2, HEIGHT - 100, window=back_button)
+
+
+def wait_for_keypress(action):
+    global key_bindings
+    """Wait for a keypress to rebind a specific action."""
+    if not game_over:
+        
+        canvas.create_text(
+            WIDTH // 2, HEIGHT // 2 + 200,
+            text=f"Press a new key for {action.capitalize()}...",
+            font=("Arial", 20), fill="yellow", tags="controls"
+        )
+
+        def on_key_press(event):
+            # Update the binding for the action
+            key_bindings[action] = event.keysym
+            old_key = key_bindings[action]
+            root.unbind(old_key)
+            # Apply new bindings
+            rebind_keys()
+            # Refresh the customization screen
+            customize_controls()
+
+        # Bind key press to get the new key
+        root.bind("<Key>", on_key_press)
+def rebind_keys():
+    global key_bindings
+    """Rebind keys based on the key_bindings dictionary."""
+    if not game_over:
+    # Unbind all current keys
+        for action, key in key_bindings.items():
+            root.unbind(key)
+
+        # Bind keys from the updated dictionary
+        root.bind(key_bindings["jump"], jump)
+        root.bind(key_bindings["pause"], toggle_pause)
+        root.bind(key_bindings["collision_toggle"], no_collision)
+        root.bind(key_bindings["pipe_gap_toggle"], pipe_on)
+        root.bind(key_bindings["score_booster"], score_booster)
+        root.bind(key_bindings["boss_key"], boss_key)
 
 def clear_screen():
     """Clear all elements from the canvas."""
@@ -170,7 +256,7 @@ def jump(event):
 
 def toggle_pause(event):
     global is_paused
-    if game_over==False:
+    if game_over==False and in_game:
         is_paused = not is_paused
         if is_paused:
             canvas.create_text(WIDTH // 2, HEIGHT // 2, text="Game Paused", font=('Arial', 20), fill="white", tags="pause")
@@ -179,17 +265,17 @@ def toggle_pause(event):
 
 def no_collision(event):
     global bypass_collision, game_over
-    if not game_over:
+    if not game_over and in_game:
         bypass_collision = not bypass_collision
 
 def pipe_on(event):
     global pipe_gap_mode, game_over
-    if not game_over:
+    if not game_over and in_game:
         pipe_gap_mode = not pipe_gap_mode
 
 def score_booster(event):
     global score, game_over
-    if not game_over:
+    if not game_over and in_game:
         score += 5
         canvas.itemconfig(score_text, text=f"Score: {score}")
 def difficulty():
@@ -318,6 +404,7 @@ def handle_game_over():
     canvas.create_text(WIDTH // 2, HEIGHT // 2 - 50, text="Game Over", font=('Arial', 30), fill="red", tags="game")
     canvas.create_text(WIDTH // 2, HEIGHT // 2, text=f"Your Score: {score}", font=('Arial', 20), fill="white", tags="game")
 
+    root.unbind("<Key>")
     # Create an entry widget for player name
     name_entry = tk.Entry(root, font=("Arial", 20))
     canvas.create_window(WIDTH // 2, HEIGHT // 2 + 50, window=name_entry)
@@ -329,7 +416,7 @@ def handle_game_over():
 def save_and_exit(player_name):
 
     """Saves the player's score and returns to the main menu."""
-    global score, game_over, pipes
+    global score, game_over, pipes, in_game
     if not player_name.strip():
         player_name = "Unknown"  # Default name if none provided
 
@@ -338,11 +425,23 @@ def save_and_exit(player_name):
     #resetting the game variables
     game_over = False
     score=0
+    in_game=False
     for top_pipe, bottom_pipe in pipes:
         canvas.delete(top_pipe)
         canvas.delete(bottom_pipe)
     pipes.clear()
+    bind_keys()
     main_menu()  # Return to main menu
+
+def bind_keys():
+    """Bind all game-related keys."""
+    root.bind("<space>", jump)
+    root.bind("p", toggle_pause)
+    root.bind("c", no_collision)
+    root.bind("g", pipe_on)
+    root.bind("b", score_booster)
+    root.bind("<Escape>", boss_key)
+
 
 # Key bindings
 root.bind("<space>", jump)
