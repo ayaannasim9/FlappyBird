@@ -147,13 +147,15 @@ def wait_for_keypress(action):
 
         def on_key_press(event):
             # Update the binding for the action
-            key_bindings[action] = event.keysym
             old_key = key_bindings[action]
-            root.unbind(old_key)
+            key_bindings[action] = event.keysym
+            
+            root.unbind(f"<{old_key}>")
             # Apply new bindings
             rebind_keys()
             # Refresh the customization screen
             customize_controls()
+            root.unbind("<Key>")
 
         # Bind key press to get the new key
         root.bind("<Key>", on_key_press)
@@ -163,15 +165,21 @@ def rebind_keys():
     if not game_over:
     # Unbind all current keys
         for action, key in key_bindings.items():
-            root.unbind(key)
+            root.unbind(f"<{key}>")
 
         # Bind keys from the updated dictionary
-        root.bind(key_bindings["jump"], jump)
-        root.bind(key_bindings["pause"], toggle_pause)
-        root.bind(key_bindings["collision_toggle"], no_collision)
-        root.bind(key_bindings["pipe_gap_toggle"], pipe_on)
-        root.bind(key_bindings["score_booster"], score_booster)
-        root.bind(key_bindings["boss_key"], boss_key)
+        # root.bind(key_bindings["jump"], jump)
+        # root.bind(key_bindings["pause"], toggle_pause)
+        # root.bind(key_bindings["collision_toggle"], no_collision)
+        # root.bind(key_bindings["pipe_gap_toggle"], pipe_on)
+        # root.bind(key_bindings["score_booster"], score_booster)
+        # root.bind(key_bindings["boss_key"], boss_key)
+        root.bind(f"<{key_bindings['jump']}>", jump)
+        root.bind(f"<{key_bindings['pause']}>", toggle_pause)
+        root.bind(f"<{key_bindings['collision_toggle']}>", no_collision)
+        root.bind(f"<{key_bindings['pipe_gap_toggle']}>", pipe_on)
+        root.bind(f"<{key_bindings['score_booster']}>", score_booster)
+        root.bind(f"<{key_bindings['boss_key']}>", boss_key)
 
 def clear_screen():
     """Clear all elements from the canvas."""
