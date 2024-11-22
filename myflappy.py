@@ -433,18 +433,7 @@ def save_and_exit(player_name):
         canvas.delete(top_pipe)
         canvas.delete(bottom_pipe)
     pipes.clear()
-    # bind_keys()
     main_menu()  # Return to main menu
-
-# def bind_keys():
-#     """Bind all game-related keys."""
-#     root.bind("<space>", jump)
-#     root.bind("p", toggle_pause)
-#     root.bind("c", no_collision)
-#     root.bind("g", pipe_on)
-#     root.bind("b", score_booster)
-#     root.bind("<Escape>", boss_key)
-
 
 # Key bindings
 root.bind("<space>", jump)
