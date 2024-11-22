@@ -582,6 +582,7 @@ root.bind("g", pipe_on)
 root.bind("b", score_booster)
 root.bind("<Escape>", boss_key)
 
+
 # Start game functions
 main_menu()
 root.mainloop()
