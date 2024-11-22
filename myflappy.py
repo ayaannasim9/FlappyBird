@@ -2,6 +2,7 @@ import tkinter as tk
 import random
 from PIL import Image, ImageTk
 import os
+import json
 
 root = tk.Tk()
 root.title("Flappy Bird")
@@ -48,26 +49,28 @@ bird_height = bird_image_tk.height()-19.3
 pipe_width = 70
 pipe_speed = 18
 pipes = []
+delay=1750
+one_time_delay=None
 # Load pipe image (pipe3.png)
 pipe_image = Image.open("pipe3.png").resize((70, HEIGHT), Image.LANCZOS) # Open pipe3.png image
 pipe_image_tk = ImageTk.PhotoImage(pipe_image)  # Convert to Tkinter PhotoImage format
 
 # Score count
 score = 0
-
 # Game settings
 is_paused = False
 
 # Cheat code
 bypass_collision = False
 pipe_gap_mode = False
-slow_motion_toggle = False
 # Boss key
 boss_image = Image.open("spreadsheet.png").resize((WIDTH,HEIGHT), Image.LANCZOS)
 boss_image_final=ImageTk.PhotoImage(boss_image)
 boss_image_displayed = False
 #Leaderboard file
 LEADERBOARD_FILE="leaderboard.txt"
+SAVE_FOLDER = "saves"
+os.makedirs(SAVE_FOLDER, exist_ok=True)
 #some ids
 move_id=None
 spawn_id=None
@@ -92,6 +95,9 @@ def main_menu():
 
     customize_button = tk.Button(root, text="Customize Controls", font=("Arial", 20), command=customize_controls)
     canvas.create_window(WIDTH // 2, HEIGHT // 2 + 160, window=customize_button)
+
+    load_button = tk.Button(root, text="Load Game", font=("Arial", 20), command=load_game)
+    canvas.create_window(WIDTH // 2, HEIGHT // 2 - 120, window=load_button)
 
 def play_game():
     global in_game
@@ -177,7 +183,7 @@ def rebind_keys():
 def clear_screen():
     """Clear all elements from the canvas."""
     canvas.delete("all")
-    # canvas.itemconfigure("game", state="hidden")
+
 def display_leaderboard():
     """Display the leaderboard on a new canvas."""
     clear_screen()
@@ -197,6 +203,7 @@ def display_leaderboard():
     # Back to main menu button
     back_button = tk.Button(root, text="Back", font=("Arial", 20), command=main_menu)
     canvas.create_window(WIDTH // 2, HEIGHT - 100, window=back_button)
+
 def show_controls():
     """Display the controls screen."""
     clear_screen()
@@ -217,6 +224,7 @@ def show_controls():
     # Back to main menu button
     back_button = tk.Button(root, text="Back", font=("Arial", 20), command=main_menu)
     canvas.create_window(WIDTH // 2, HEIGHT - 100, window=back_button)
+
 def boss_key(event):
     global boss_image_displayed, is_paused
     is_paused=not is_paused
@@ -232,6 +240,7 @@ def boss_key(event):
         canvas.itemconfigure("game", state="normal")
     
     boss_image_displayed = not boss_image_displayed
+
 def sort_leaderboard():
     global LEADERBOARD_FILE
     """Sort the leaderboard and save it back to the file."""
@@ -255,7 +264,8 @@ def sort_leaderboard():
 
 def jump(event):
     global bird_speed_y, jump_strength
-    bird_speed_y = jump_strength
+    if not game_over and in_game: #preventing jump when not in a game session
+        bird_speed_y = jump_strength
 
 def toggle_pause(event):
     global is_paused
@@ -263,8 +273,103 @@ def toggle_pause(event):
         is_paused = not is_paused
         if is_paused:
             canvas.create_text(WIDTH // 2, HEIGHT // 2, text="Game Paused", font=('Arial', 20), fill="white", tags="pause")
+            save_button = tk.Button(root, text="Save Game", font=("Arial", 20), command=save_game)
+            canvas.create_window(WIDTH // 2, HEIGHT // 2 + 50, window=save_button, tags="save_button")
         else:
             canvas.delete("pause")
+            canvas.delete("save_button")
+
+def save_game():
+    """Save the current game state."""
+    if game_over:
+        return
+    
+    def confirm_save():
+        """Save the data to the specified file."""
+        filename = save_entry.get().strip()
+        if not filename:
+            filename = "savefile"
+        filepath = os.path.join(SAVE_FOLDER, f"{filename}.json")
+
+        save_data = {
+            "bird_y": bird_y,
+            "bird_speed_y": bird_speed_y,
+            "score": score,
+            "pipes": [
+                {"top": canvas.coords(top), "bottom": canvas.coords(bottom)}
+                for top, bottom in pipes
+            ],
+            "is_paused": is_paused,
+            "pipe_speed": pipe_speed,
+            "bypass_collision": bypass_collision,
+            "pipe_gap_mode": pipe_gap_mode
+        }
+
+        with open(filepath, "w") as f:
+            json.dump(save_data, f)
+        canvas.delete("save_prompt")
+        canvas.delete("save_button")
+        canvas.delete("save_entry")
+
+    # Prompt for save file name
+    canvas.create_text(WIDTH // 2, HEIGHT // 2 - 100, text="Enter Save File Name:", font=("Arial", 20), fill="white", tags="save_prompt")
+    save_entry = tk.Entry(root, font=("Arial", 20))
+    canvas.create_window(WIDTH // 2, HEIGHT // 2 - 50, window=save_entry, tags="save_entry")
+    save_button = tk.Button(root, text="Save", font=("Arial", 20), command=confirm_save)
+    canvas.create_window(WIDTH // 2, HEIGHT // 2, window=save_button, tags="save_button")
+
+def load_game():
+    """Display the load game menu."""
+    clear_screen()
+    canvas.create_text(WIDTH // 2, HEIGHT // 6, text="Load Game", font=("Arial", 40), fill="white", tags="load_menu")
+    
+    # List saved files
+    save_files = [f for f in os.listdir(SAVE_FOLDER) if f.endswith(".json")]
+    if not save_files:
+        canvas.create_text(WIDTH // 2, HEIGHT // 2, text="No saved files found!", font=("Arial", 20), fill="white", tags="load_menu")
+        back_button = tk.Button(root, text="Back", font=("Arial", 20), command=main_menu)
+        canvas.create_window(WIDTH // 2, HEIGHT - 100, window=back_button)
+        return
+
+    def load_selected(file):
+        filepath = os.path.join(SAVE_FOLDER, file)
+        with open(filepath, "r") as f:
+            save_data = json.load(f)
+
+        global bird_y, bird_speed_y, score, pipes, is_paused, pipe_speed,in_game,one_time_delay
+        bird_y = save_data["bird_y"]
+        bird_speed_y = save_data["bird_speed_y"]
+        score = save_data["score"]
+        is_paused = save_data["is_paused"]
+        pipe_speed = save_data["pipe_speed"]
+        
+        # Restore pipes
+        for top_pipe, bottom_pipe in pipes:
+            canvas.delete(top_pipe)
+            canvas.delete(bottom_pipe)
+        pipes.clear()
+        clear_screen()
+        global background_image,bird,score_text
+        canvas.create_image(0, 0, image=background_image, anchor="nw")
+        score_text = canvas.create_text(WIDTH - 60, 30, text=f"Score: {score}", font=('Arial', 20), fill="white", tags="game")
+        bird = canvas.create_image(bird_x, bird_y, image=bird_image_tk, anchor="center", tags="game")
+        for pipe in save_data["pipes"]:
+            top_coords = pipe["top"]
+            bottom_coords = pipe["bottom"]
+            top_pipe = canvas.create_image(top_coords[0], top_coords[1], image=pipe_image_tk, anchor="s", tags="game")
+            bottom_pipe = canvas.create_image(bottom_coords[0], bottom_coords[1], image=pipe_image_tk, anchor="n", tags="game")
+            pipes.append((top_pipe, bottom_pipe))
+        in_game=True
+        one_time_delay=root.after(2750,spawn_pipe)
+        move()
+
+    for i, file in enumerate(save_files):
+        button = tk.Button(root, text=file, font=("Arial", 16), command=lambda f=file: load_selected(f))
+        canvas.create_window(WIDTH // 2, HEIGHT // 3 + i * 50, window=button, tags="load_menu")
+
+    # Back to menu button
+    back_button = tk.Button(root, text="Back", font=("Arial", 20), command=main_menu)
+    canvas.create_window(WIDTH // 2, HEIGHT - 100, window=back_button)
 
 def no_collision(event):
     global bypass_collision, game_over
@@ -282,25 +387,18 @@ def score_booster(event):
         score += 5
         canvas.itemconfig(score_text, text=f"Score: {score}")
 def difficulty():
-    # print("adjusting difficulty")
     global pipe_speed, score
     if score<=5:
         pipe_speed=pipe_speed
-        # print(pipe_speed)
     elif score <=10:
         pipe_speed=23.5
-        # print(pipe_speed)
     elif score<=15:
         pipe_speed=28
-        # print(pipe_speed)
     else:
         pipe_speed=33
-        # print(pipe_speed)
 
 def spawn_pipe():
-    # print("in spaw_pipe")
-    global is_paused, pipe_gap_mode, spawn_id
-    delay = 1750
+    global is_paused, pipe_gap_mode, spawn_id, pipes, delay, one_time_delay
     if not pipe_gap_mode:
         pipe_gap = random.randint(30, 38)
     else:
@@ -315,10 +413,10 @@ def spawn_pipe():
                 top_pipe = canvas.create_image(pipe_x, gap_y - (pipe_width // 2), image=pipe_image_tk, anchor="s", tags="game")
                 bottom_pipe = canvas.create_image(pipe_x, gap_y + pipe_gap + (pipe_width // 2), image=pipe_image_tk, anchor="n", tags="game")
                 pipes.append((top_pipe, bottom_pipe))
-
-    # Spawn pipes every 4000ms (or adjust as needed)
     if not game_over:
         spawn_id = root.after(delay, spawn_pipe)
+        if one_time_delay is not None:
+            root.after_cancel(one_time_delay)
     else:
         if spawn_id is not None:
             root.after_cancel(spawn_id)
@@ -337,7 +435,7 @@ def save_score(player_name, player_score):
     sort_leaderboard()
 def move():
     # print("in move")
-    global bird_y, bird_speed_y, score, game_over, is_paused, bypass_collision, pipe_speed, slow_motion_toggle, gravity, jump_strength, move_id
+    global bird_y, bird_speed_y, score, game_over, is_paused, bypass_collision, pipe_speed, slow_motion_toggle, gravity, jump_strength, move_id, pipes
     if score%5==0:
         # print("inside this thing in move")
         difficulty()
@@ -361,6 +459,10 @@ def move():
 
         # Move pipes and check collisions
         for top_pipe, bottom_pipe in pipes:
+            if not canvas.find_withtag(top_pipe) or not canvas.find_withtag(bottom_pipe):
+             # Pipe was deleted, remove it from the list
+                pipes.remove((top_pipe, bottom_pipe))
+                continue
             canvas.move(top_pipe, -pipe_speed, 0)
             canvas.move(bottom_pipe, -pipe_speed, 0)
 
