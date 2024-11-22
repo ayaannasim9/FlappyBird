@@ -80,6 +80,7 @@ move_id=None
 spawn_id=None
 
 def main_menu():
+    """Displays main menu"""
     # Main menu title
     clear_screen()
     canvas.create_image(0, 0, image=background_image, anchor="nw")
@@ -104,6 +105,7 @@ def main_menu():
     canvas.create_window(WIDTH // 2, HEIGHT // 2 - 120, window=load_button)
 
 def play_game():
+    """Starts the game"""
     global in_game
     clear_screen()
     global background_image,bird,score_text
@@ -232,6 +234,7 @@ def show_controls():
     canvas.create_window(WIDTH // 2, HEIGHT - 100, window=back_button)
 
 def boss_key(event):
+    """Displays a spreadsheet image"""
     global boss_image_displayed, is_paused
     is_paused=not is_paused
     if not boss_image_displayed:
@@ -269,11 +272,13 @@ def sort_leaderboard():
             f.write(f"{name}: {score}\n")
 
 def jump(event):
+    """Triggers the bird to jump"""
     global bird_speed_y, jump_strength
     if not game_over and in_game: #preventing jump when not in a game session
         bird_speed_y = jump_strength
 
 def toggle_pause(event):
+    """Pauses/Resumes the game"""
     global is_paused
     if game_over==False and in_game:
         is_paused = not is_paused
@@ -380,22 +385,26 @@ def load_game():
     canvas.create_window(WIDTH // 2, HEIGHT - 100, window=back_button)
 
 def no_collision(event):
+    """Toggles no collision mode on"""
     global bypass_collision, game_over
     if not game_over and in_game:
         bypass_collision = not bypass_collision
 
 def pipe_on(event):
+    """Toggles pipe gap mode on(increases the pipe gap by a lot)"""
     global pipe_gap_mode, game_over
     if not game_over and in_game:
         pipe_gap_mode = not pipe_gap_mode
 
 def score_booster(event):
+    """boosts the score by 5 during game"""
     global score, game_over
     if not game_over and in_game:
         score += 5
         canvas.itemconfig(score_text, text=f"Score: {score}")
 
 def difficulty():
+    """Adjusts difficulty, as the player's score increases"""
     global pipe_speed, score, delay
     if score<=5:
         pipe_speed=18
@@ -410,6 +419,7 @@ def difficulty():
         delay=1200
 
 def spawn_pipe():
+    """Spawn pipes after a certain amount of delay"""
     global is_paused, pipe_gap_mode, spawn_id, pipes, delay, one_time_delay
     if not pipe_gap_mode:
         pipe_gap = random.randint(30, 38)
@@ -437,12 +447,11 @@ def spawn_pipe():
         root.after_cancel(spawn_id)
 
 def move():
-    # print("in move")
+    """Main function, which applies gravity to the bird, and makes the pipes move, and checks if collision has happened"""
     global bird_y, bird_speed_y, score, game_over, is_paused, bypass_collision, pipe_speed, gravity, jump_strength, move_id, pipes
     if score%5==0:
-        # print("inside this thing in move")
         difficulty()
-    # print(pipe_speed)
+
     if not is_paused:
         # Apply gravity to the bird
         bird_speed_y += gravity
@@ -462,7 +471,6 @@ def move():
 
         # Move pipes and check collisions
         for top_pipe, bottom_pipe in pipes:
-            
             canvas.move(top_pipe, -pipe_speed, 0)
             canvas.move(bottom_pipe, -pipe_speed, 0)
 
@@ -479,7 +487,7 @@ def move():
                 canvas.itemconfig(score_text, text=f"Score: {score}")
 
             # Detect collisions
-            if not bypass_collision:
+            if not bypass_collision: #skips if bypass collision mode is on
                 if ((bird_x2 > top_coords[0] - pipe_width // 2 and bird_x1 < top_coords[0] + pipe_width // 2) and
                         (bird_y1 < top_coords[1] or bird_y2 > bottom_coords[1])):
                     game_over = True
@@ -488,7 +496,6 @@ def move():
             handle_game_over()
             return
     move_id=root.after(15, move)
-
 
 def handle_game_over():
     """Handles game-over state and prompts for player name."""
@@ -557,6 +564,7 @@ root.bind("c", no_collision)
 root.bind("g", pipe_on)
 root.bind("b", score_booster)
 root.bind("<Escape>", boss_key)
-main_menu()
+
 # Start game functions
+main_menu()
 root.mainloop()
