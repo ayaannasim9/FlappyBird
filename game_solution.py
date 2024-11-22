@@ -311,6 +311,9 @@ def save_game():
             filename = "savefile"
         filepath = os.path.join(SAVE_FOLDER, f"{filename}.json")
 
+        if not os.path.exists(SAVE_FOLDER):
+            os.makedirs(SAVE_FOLDER)
+
         save_data = {
             "bird_y": bird_y,
             "bird_speed_y": bird_speed_y,
