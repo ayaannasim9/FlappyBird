@@ -1,3 +1,4 @@
+#importing required packages
 import tkinter as tk
 import random
 from PIL import Image, ImageTk
@@ -6,7 +7,7 @@ import json
 
 root = tk.Tk()
 root.title("Flappy Bird")
-# WIDTH, HEIGHT = root.winfo_screenwidth(), root.winfo_screenheight()
+
 WIDTH, HEIGHT = 1200,800
 root.geometry(f"{WIDTH}x{HEIGHT}")
 canvas = tk.Canvas(root, width=WIDTH, height=HEIGHT)
@@ -35,12 +36,17 @@ bird_y = HEIGHT // 2
 bird_speed_y = 0
 gravity = 2
 jump_strength = -19.0
+
+#variables to check if the user is in a game session
 game_over = False
 in_game=False
+is_paused = False
 
 # Load the bird image
 bird_image = Image.open("bird3.png").resize((50,50), Image.LANCZOS)
 bird_image_tk=ImageTk.PhotoImage(bird_image)
+
+#bird dimensions adjusted for collision mechanics
 bird_width = bird_image_tk.width()-19.3
 bird_height = bird_image_tk.height()-19.3
 
@@ -58,9 +64,6 @@ pipe_image_tk = ImageTk.PhotoImage(pipe_image)  # Convert to Tkinter PhotoImage 
 # Score count
 score = 0
 
-# Game settings
-is_paused = False
-
 # Cheat codes
 bypass_collision = False
 pipe_gap_mode = False
@@ -75,10 +78,15 @@ LEADERBOARD_FILE="leaderboard.txt"
 SAVE_FOLDER = "saves"
 os.makedirs(SAVE_FOLDER, exist_ok=True)
 
-#some ids
+#IDs to stop calling functions when required
 move_id=None
 spawn_id=None
 
+def clear_screen():
+    """Clear all elements from the canvas."""
+    canvas.delete("all")
+
+#main menu and function to invoke start of game
 def main_menu():
     """Displays main menu"""
     # Main menu title
@@ -116,6 +124,7 @@ def play_game():
     spawn_pipe()
     move()
 
+#remap keys and show keys
 def customize_controls():
     """A screen where users can customize controls."""
     clear_screen()
@@ -145,7 +154,6 @@ def customize_controls():
     # Add a "Back to Menu" button
     back_button = tk.Button(root, text="Back", font=("Arial", 20), command=main_menu)
     canvas.create_window(WIDTH // 2, HEIGHT - 100, window=back_button)
-
 
 def wait_for_keypress(action):
     global key_bindings
@@ -188,30 +196,6 @@ def rebind_keys():
         root.bind(f"<{key_bindings['score_booster']}>", score_booster)
         root.bind(f"<{key_bindings['boss_key']}>", boss_key)
 
-def clear_screen():
-    """Clear all elements from the canvas."""
-    canvas.delete("all")
-
-def display_leaderboard():
-    """Display the leaderboard on a new canvas."""
-    clear_screen()
-
-    canvas.create_text(WIDTH // 2, HEIGHT // 6, text="Leaderboard", font=("Arial", 40), fill="white", tags="leaderboard")
-
-    try:
-        with open(LEADERBOARD_FILE, 'r') as f:
-            lines = f.readlines()
-    except FileNotFoundError:
-        lines = []
-
-    # Display the top 10 scores
-    for i, line in enumerate(lines[:10]):  # Limit to top 10 scores
-        canvas.create_text(WIDTH // 2, HEIGHT // 4 + i * 30, text=line.strip(), font=("Arial", 20), fill="white", tags="leaderboard")
-
-    # Back to main menu button
-    back_button = tk.Button(root, text="Back", font=("Arial", 20), command=main_menu)
-    canvas.create_window(WIDTH // 2, HEIGHT - 100, window=back_button)
-
 def show_controls():
     """Display the controls screen."""
     clear_screen()
@@ -233,22 +217,26 @@ def show_controls():
     back_button = tk.Button(root, text="Back", font=("Arial", 20), command=main_menu)
     canvas.create_window(WIDTH // 2, HEIGHT - 100, window=back_button)
 
-def boss_key(event):
-    """Displays a spreadsheet image"""
-    global boss_image_displayed, is_paused
-    is_paused=not is_paused
-    if not boss_image_displayed:
-        # Hide all game elements
-        canvas.itemconfigure("game", state="hidden")
-        # Display boss image
-        canvas.create_image(0, 0, anchor="nw", image=boss_image_final, tags="boss")
-    else:
-        # Remove boss image
-        canvas.delete("boss")
-        # Show all game elements
-        canvas.itemconfigure("game", state="normal")
-    
-    boss_image_displayed = not boss_image_displayed
+#display and sort leaderboard
+def display_leaderboard():
+    """Display the leaderboard on a new canvas."""
+    clear_screen()
+
+    canvas.create_text(WIDTH // 2, HEIGHT // 6, text="Leaderboard", font=("Arial", 40), fill="white", tags="leaderboard")
+
+    try:
+        with open(LEADERBOARD_FILE, 'r') as f:
+            lines = f.readlines()
+    except FileNotFoundError:
+        lines = []
+
+    # Display the top 10 scores
+    for i, line in enumerate(lines[:10]):  # Limit to top 10 scores
+        canvas.create_text(WIDTH // 2, HEIGHT // 4 + i * 30, text=line.strip(), font=("Arial", 20), fill="white", tags="leaderboard")
+
+    # Back to main menu button
+    back_button = tk.Button(root, text="Back", font=("Arial", 20), command=main_menu)
+    canvas.create_window(WIDTH // 2, HEIGHT - 100, window=back_button)
 
 def sort_leaderboard():
     global LEADERBOARD_FILE
@@ -271,12 +259,32 @@ def sort_leaderboard():
         for name, score in scores:
             f.write(f"{name}: {score}\n")
 
+#boss key
+def boss_key(event):
+    """Displays a spreadsheet image"""
+    global boss_image_displayed, is_paused
+    is_paused=not is_paused
+    if not boss_image_displayed:
+        # Hide all game elements
+        canvas.itemconfigure("game", state="hidden")
+        # Display boss image
+        canvas.create_image(0, 0, anchor="nw", image=boss_image_final, tags="boss")
+    else:
+        # Remove boss image
+        canvas.delete("boss")
+        # Show all game elements
+        canvas.itemconfigure("game", state="normal")
+    
+    boss_image_displayed = not boss_image_displayed
+
+#jump
 def jump(event):
     """Triggers the bird to jump"""
     global bird_speed_y, jump_strength
     if not game_over and in_game: #preventing jump when not in a game session
         bird_speed_y = jump_strength
 
+#pause
 def toggle_pause(event):
     """Pauses/Resumes the game"""
     global is_paused
@@ -290,6 +298,7 @@ def toggle_pause(event):
             canvas.delete("pause")
             canvas.delete("save_button")
 
+#save and load game
 def save_game():
     """Save the current game state."""
     if game_over:
@@ -384,6 +393,7 @@ def load_game():
     back_button = tk.Button(root, text="Back", font=("Arial", 20), command=main_menu)
     canvas.create_window(WIDTH // 2, HEIGHT - 100, window=back_button)
 
+#cheat codes
 def no_collision(event):
     """Toggles no collision mode on"""
     global bypass_collision, game_over
@@ -403,6 +413,7 @@ def score_booster(event):
         score += 5
         canvas.itemconfig(score_text, text=f"Score: {score}")
 
+#difficulty adjustment and main game
 def difficulty():
     """Adjusts difficulty, as the player's score increases"""
     global pipe_speed, score, delay
@@ -497,6 +508,7 @@ def move():
             return
     move_id=root.after(15, move)
 
+#game over and save score and name
 def handle_game_over():
     """Handles game-over state and prompts for player name."""
     global score, game_over, move_id, bird_y, bird_speed_y, spawn_id
