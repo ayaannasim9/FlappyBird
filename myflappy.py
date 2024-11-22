@@ -167,13 +167,6 @@ def rebind_keys():
         for action, key in key_bindings.items():
             root.unbind(f"<{key}>")
 
-        # Bind keys from the updated dictionary
-        # root.bind(key_bindings["jump"], jump)
-        # root.bind(key_bindings["pause"], toggle_pause)
-        # root.bind(key_bindings["collision_toggle"], no_collision)
-        # root.bind(key_bindings["pipe_gap_toggle"], pipe_on)
-        # root.bind(key_bindings["score_booster"], score_booster)
-        # root.bind(key_bindings["boss_key"], boss_key)
         root.bind(f"<{key_bindings['jump']}>", jump)
         root.bind(f"<{key_bindings['pause']}>", toggle_pause)
         root.bind(f"<{key_bindings['collision_toggle']}>", no_collision)
