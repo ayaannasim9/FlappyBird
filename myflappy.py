@@ -419,7 +419,7 @@ def handle_game_over():
 def save_and_exit(player_name):
 
     """Saves the player's score and returns to the main menu."""
-    global score, game_over, pipes, in_game
+    global score, game_over, pipes, in_game, pipe_speed
     if not player_name.strip():
         player_name = "Unknown"  # Default name if none provided
 
@@ -429,6 +429,7 @@ def save_and_exit(player_name):
     game_over = False
     score=0
     in_game=False
+    pipe_speed=18
     for top_pipe, bottom_pipe in pipes:
         canvas.delete(top_pipe)
         canvas.delete(bottom_pipe)
