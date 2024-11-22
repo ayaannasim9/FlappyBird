@@ -300,6 +300,8 @@ def toggle_pause(event):
 
 #save and load game
 def save_game():
+    global in_game
+    in_game=False
     """Save the current game state."""
     if game_over:
         return
