@@ -4,6 +4,7 @@ import random
 from PIL import Image, ImageTk
 import os
 import json
+import platform
 
 root = tk.Tk()
 root.title("Flappy Bird")
@@ -465,6 +466,9 @@ def spawn_pipe():
 def move():
     """Main function, which applies gravity to the bird, and makes the pipes move, and checks if collision has happened"""
     global bird_y, bird_speed_y, score, game_over, is_paused, bypass_collision, pipe_speed, gravity, jump_strength, move_id, pipes
+    window_pause=15
+    if platform.system()=="Windows":
+        window_pause=40
     if score%5==0:
         difficulty()
 
@@ -511,7 +515,7 @@ def move():
         if game_over:
             handle_game_over()
             return
-    move_id=root.after(15, move)
+    move_id=root.after(window_pause, move)
 
 #game over and save score and name
 def handle_game_over():
