@@ -129,6 +129,7 @@ def play_game():
 def customize_controls():
     """A screen where users can customize controls."""
     clear_screen()
+    canvas.configure(bg="#2E2E2E")
 
     canvas.create_text(
         WIDTH // 2, HEIGHT // 6,
@@ -200,6 +201,7 @@ def rebind_keys():
 def show_controls():
     """Display the controls screen."""
     clear_screen()
+    canvas.configure(bg="#2E2E2E")
     canvas.create_text(WIDTH // 2, HEIGHT // 6, text="Controls", font=("Arial", 40), fill="white", tags="controls")
     # Display updated key bindings
     controls_info = [
@@ -222,6 +224,7 @@ def show_controls():
 def display_leaderboard():
     """Display the leaderboard on a new canvas."""
     clear_screen()
+    canvas.configure(bg="#2E2E2E")
 
     canvas.create_text(WIDTH // 2, HEIGHT // 6, text="Leaderboard", font=("Arial", 40), fill="white", tags="leaderboard")
 
